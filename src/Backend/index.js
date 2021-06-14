@@ -49,14 +49,37 @@ class Firebase {
         return user.uid;
     }
 
-    votePresident(presidentName){
-        return this.db.ref("votes").child("test").child(presidentName).push({
-            presedentName: presidentName,
-        }).catch((error) => {
-            alert(error.message);
-            console.log(error.message);
-        });
+    getMarkers() {
+        const locations = [];
+        const temp=[];
+        this.db.ref('DVML Audio Detector Mobile').child("distressCalls").on('value', (snapshot) => {
+            snapshot.forEach(data => {
+                const dataVal = data.val();
+                this.db.ref("Users").on('value', (snapshot) => {
+                    snapshot.forEach(userData => {
+                        if (userData.key===data.key){
+                            const userDataVal=userData.val();
+                            const surname=userDataVal.personFamilyName;
+                            const name=userDataVal.personGivenName;
+                            const personPhoto=userDataVal.personPhoto;
+
+                            locations.push(...locations,{
+                                name: name,
+                                surname:surname,
+                                personPhoto:personPhoto,
+                                lat:dataVal.Latitude,
+                                lng: dataVal.Longitude
+                            })
+                        }
+                    })
+
+                })
+
+            })
+        })
+        return locations;
     }
+
 
 }
 
